@@ -4,6 +4,6 @@ Take-sreenshots is an easy-to-use tool that helps you take screenshots every few
 
 ## features
  - customize output folder
- - customize time delta
+ - customize time interval
  - tray icon support
 
