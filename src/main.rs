@@ -160,6 +160,11 @@ fn main() {
                             let times = stop.as_millis() / duration.as_millis();
                             if stop.as_millis() > 0 {
 
+                                if minimize_checkbutton.is_checked() {
+                                    main_window.iconize();
+                                    std::thread::sleep(std::time::Duration::from_millis(600));
+                                }
+
                                 let _job = std::thread::spawn(move || {
 
                                     for _ in 0..times {
