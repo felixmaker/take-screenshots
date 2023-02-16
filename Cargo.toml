@@ -18,3 +18,4 @@ directories = "4.0.1"
 humantime = "2.1.0"
 chrono = "0.4.23"
 screenshots = "0.5.0"
+tokio = { version = "1.25.0", features = ["time", "rt", "macros", "rt-multi-thread", "fs"] }

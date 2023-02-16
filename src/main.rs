@@ -5,7 +5,8 @@ use fltk::{prelude::*, *};
 use chrono::{format::{strftime, Item}, Utc, DateTime, Local};
 use screenshots::Screen;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let app = app::App::default();
 
     let mut picture_folder = "".to_owned();
@@ -162,30 +163,21 @@ fn main() {
 
                                 if minimize_checkbutton.is_checked() {
                                     main_window.iconize();
-                                    std::thread::sleep(std::time::Duration::from_millis(600));
+                                    tokio::time::sleep(std::time::Duration::from_millis(600)).await;
                                 }
+                                button_start.deactivate();
 
-                                let _job = std::thread::spawn(move || {
+                                tokio::spawn(async move {
+                                    
+                                    let mut interval = tokio::time::interval(duration.into());
 
                                     for _ in 0..times {
-                                        let screens = Screen::all().unwrap();
-                                        if screens.len() > 1 {
-                                            return;
-                                        }
-                            
-                                        let screen = screens[0];
-                                        let now: DateTime<Local> = Utc::now().into();     
-                                        let filename = now.format(&format);  
-                                        let image = screen.capture().unwrap();
-                                        let buffer = image.buffer();
-                                        std::fs::write(format!("{output_folder}/{filename}"), &buffer).unwrap();
-                            
-                                        std::thread::sleep(std::time::Duration::from_secs(duration.as_secs()))
+                                        interval.tick().await;
+                                        screenshot(&format, &output_folder).await;
                                     }
 
                                     s.send("activate");
-                                });
-                                button_start.deactivate();      
+                                });                                
                             }                              
                         },
                         _ => {
@@ -203,4 +195,18 @@ fn main() {
             }
         }
     }
+}
+
+async fn screenshot(format: &str, output_folder: &str) {
+    let screens = Screen::all().unwrap();
+    if screens.len() > 1 {
+        return;
+    }
+
+    let screen = screens[0];
+    let now: DateTime<Local> = Utc::now().into();     
+    let filename = now.format(&format);  
+    let image = screen.capture().unwrap();
+    let buffer = image.buffer();
+    tokio::fs::write(format!("{output_folder}/{filename}"), &buffer).await.unwrap();
 }
